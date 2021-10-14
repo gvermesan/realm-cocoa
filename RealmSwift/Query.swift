@@ -360,7 +360,7 @@ extension Query where T: RealmCollection {
     }
 }
 
-extension Query where T: RealmCollection, T.Element: _Persistable, T.Element.PersistedType: _QueryNumeric {
+extension Query where T: RealmCollection, T.Element.PersistedType: _QueryNumeric {
     /// :nodoc:
     public static func > (_ lhs: Query<T>, _ rhs: T.Element) -> Query<Bool> {
         .init(.comparison(operator: .greaterThan, lhs.node, .constant(rhs), options: []))
@@ -416,7 +416,7 @@ extension Query where T: RealmKeyedCollection {
     }
     /// Allows a query over all values in the Map.
     public var values: Query<T.Value> {
-        .init(keyPathErasingAnyPrefix(appending: "@allValues"))
+        .init(appendKeyPath("@allValues", options: []))
     }
     /// :nodoc:
     public subscript(member: T.Key) -> Query<T.Value> {
@@ -424,25 +424,10 @@ extension Query where T: RealmKeyedCollection {
     }
 }
 
-extension Query where T: RealmKeyedCollection, T.Value: OptionalProtocol, T.Value.Wrapped: _RealmSchemaDiscoverable {
-    /// Allows a query over all values in the Map.
-    public var values: Query<T.Value.Wrapped> {
-        .init(keyPathErasingAnyPrefix(appending: "@allValues"))
-    }
-    /// :nodoc:
-    public subscript(member: T.Key) -> Query<T.Value.Wrapped> {
-        .init(.mapSubscript(keyPathErasingAnyPrefix(), key: member))
-    }
-    /// :nodoc:
-    public subscript(member: T.Key) -> Query<T.Value> where T.Value.Wrapped: ObjectBase {
-        .init(.mapSubscript(keyPathErasingAnyPrefix(), key: member))
-    }
-}
-
 extension Query where T: RealmKeyedCollection, T.Key == String {
     /// Allows a query over all keys in the `Map`.
     public var keys: Query<String> {
-        .init(keyPathErasingAnyPrefix(appending: "@allKeys"))
+        .init(appendKeyPath("@allKeys", options: []))
     }
 }
 
@@ -478,8 +463,7 @@ extension Query where T: RealmKeyedCollection, T.Value: OptionalProtocol, T.Valu
     }
 }
 
-extension Query where T: RealmKeyedCollection,
-                      T.Value: _Persistable, T.Value.PersistedType: _QueryNumeric {
+extension Query where T: RealmKeyedCollection, T.Value.PersistedType: _QueryNumeric {
     /// Returns the minimum value in the keyed collection.
     public var min: Query<T.Value> {
         .init(keyPathErasingAnyPrefix(appending: "@min"))
@@ -538,18 +522,61 @@ extension Query where T: RealmKeyedCollection, T.Value: PersistableEnum, T.Value
         .init(node)
     }
 }
-extension Query where T: RealmCollection, T.Element: OptionalProtocol, T.Element.Wrapped: PersistableEnum, T.Element.Wrapped.RawValue: RealmCollectionValue & _RealmSchemaDiscoverable & _DefaultConstructible {
+extension Query where T: RealmCollection, T.Element: OptionalProtocol, T.Element.Wrapped: PersistableEnum, T.Element.Wrapped.RawValue: RealmCollectionValue & _RealmSchemaDiscoverable & _DefaultConstructible & _PersistableInOptional {
     /// Query on the rawValue of the Enums in the collection rather than the Enums themselves.
     public var rawValue: Query<List<T.Element.Wrapped.RawValue?>> {
         .init(node)
     }
 }
-extension Query where T: RealmKeyedCollection, T.Value: OptionalProtocol, T.Value.Wrapped: PersistableEnum, T.Value.Wrapped.RawValue: RealmCollectionValue & _RealmSchemaDiscoverable & _DefaultConstructible {
+extension Query where T: RealmKeyedCollection, T.Value: OptionalProtocol, T.Value.Wrapped: PersistableEnum, T.Value.Wrapped.RawValue: RealmCollectionValue & _RealmSchemaDiscoverable & _DefaultConstructible & _PersistableInOptional {
     /// Query on the rawValue of the Enums in the collection rather than the Enums themselves.
     public var rawValue: Query<Map<T.Key, T.Value.Wrapped.RawValue?>> {
         .init(node)
     }
 }
+
+// MARK: - CustomPersistable
+
+extension Query where T: _Persistable {
+    /// Query on the persistableValue of the Enum rather than the Enum itself.
+    public var persistableValue: Query<T.PersistedType> {
+        .init(node)
+    }
+}
+//extension Query where T: OptionalProtocol, T.Wrapped: _Persistable {
+//    /// Query on the persistableValue of the Enum rather than the Enum itself.
+//    public var persistableValue: Query<T.Wrapped.PersistedType?> {
+//        .init(node)
+//    }
+//}
+
+// The actual collection type returned in these doesn't matter because it's
+// only used to constrain the set of operations available, and the collections
+// all have the same operations.
+extension Query where T: RealmCollection {
+    /// Query on the persistableValue of the Enums in the collection rather than the Enums themselves.
+    public var persistableValue: Query<List<T.Element.PersistedType>> {
+        .init(node)
+    }
+}
+extension Query where T: RealmKeyedCollection {
+    /// Query on the persistableValue of the Enums in the collection rather than the Enums themselves.
+    public var persistableValue: Query<Map<T.Key, T.Value.PersistedType>> {
+        .init(node)
+    }
+}
+//extension Query where T: RealmCollection, T.Element: OptionalProtocol, T.Element.Wrapped: _Persistable, T.Element.Wrapped.PersistedType: RealmCollectionValue & _RealmSchemaDiscoverable & _DefaultConstructible & _PersistableInOptional {
+//    /// Query on the persistableValue of the Enums in the collection rather than the Enums themselves.
+//    public var persistableValue: Query<List<T.Element.Wrapped.PersistedType?>> {
+//        .init(node)
+//    }
+//}
+//extension Query where T: RealmKeyedCollection, T.Value: OptionalProtocol, T.Value.Wrapped: _Persistable, T.Value.Wrapped.PersistedType: RealmCollectionValue & _RealmSchemaDiscoverable & _DefaultConstructible & _PersistableInOptional {
+//    /// Query on the persistableValue of the Enums in the collection rather than the Enums themselves.
+//    public var persistableValue: Query<Map<T.Key, T.Value.Wrapped.PersistedType?>> {
+//        .init(node)
+//    }
+//}
 
 // MARK: _QueryNumeric
 

@@ -19,7 +19,7 @@
 import Realm
 import Realm.Private
 
-extension Object: SchemaDiscoverable, _OptionalPersistable, _DefaultConstructible {
+extension Object: SchemaDiscoverable, _PersistableInOptional, _DefaultConstructible {
     public typealias PersistedType = Object
     public static var _rlmType: PropertyType { .object }
     public static func _rlmPopulateProperty(_ prop: RLMProperty) {
@@ -56,7 +56,7 @@ extension Object: SchemaDiscoverable, _OptionalPersistable, _DefaultConstructibl
     }
 }
 
-extension EmbeddedObject: SchemaDiscoverable, _OptionalPersistable, _DefaultConstructible {
+extension EmbeddedObject: SchemaDiscoverable, _PersistableInOptional, _DefaultConstructible {
     public typealias PersistedType = EmbeddedObject
     public static var _rlmType: PropertyType { .object }
     public static func _rlmPopulateProperty(_ prop: RLMProperty) {
@@ -68,7 +68,10 @@ extension EmbeddedObject: SchemaDiscoverable, _OptionalPersistable, _DefaultCons
     }
 
     public static func _rlmGetProperty(_ obj: ObjectBase, _ key: UInt16) -> Self {
-        fatalError("Non-optional EmbeddedObject properties are not allowed.")
+        if let value = RLMGetSwiftPropertyObject(obj, key) {
+            return (value as! Self)
+        }
+        return Self()
     }
 
     public static func _rlmGetPropertyOptional(_ obj: ObjectBase, _ key: UInt16) -> Self? {
@@ -102,10 +105,6 @@ extension List: _Persistable, _DefaultConstructible where Element: _Persistable 
         return Self(collection: RLMGetSwiftPropertyArray(obj, key))
     }
 
-    public static func _rlmGetPropertyOptional(_ obj: ObjectBase, _ key: UInt16) -> Self? {
-        fatalError("List properties cannot be optional")
-    }
-
     public static func _rlmSetProperty(_ obj: ObjectBase, _ key: UInt16, _ value: List) {
         let array = RLMGetSwiftPropertyArray(obj, key)
         if array.isEqual(value.rlmArray) { return }
@@ -135,10 +134,6 @@ extension MutableSet: _Persistable, _DefaultConstructible where Element: _Persis
 
     public static func _rlmGetProperty(_ obj: ObjectBase, _ key: UInt16) -> Self {
         return Self(collection: RLMGetSwiftPropertySet(obj, key))
-    }
-
-    public static func _rlmGetPropertyOptional(_ obj: ObjectBase, _ key: UInt16) -> Self? {
-        fatalError("Set properties cannot be optional")
     }
 
     public static func _rlmSetProperty(_ obj: ObjectBase, _ key: UInt16, _ value: MutableSet) {
@@ -231,10 +226,6 @@ extension LinkingObjects: _Persistable where Element: _Persistable {
         return Self(propertyName: prop.name, handle: RLMLinkingObjectsHandle(object: obj, property: prop))
     }
 
-    public static func _rlmGetPropertyOptional(_ obj: ObjectBase, _ key: UInt16) -> LinkingObjects? {
-        fatalError("LinkingObjects properties cannot be optional")
-    }
-
     public static func _rlmSetProperty(_ obj: ObjectBase, _ key: UInt16, _ value: LinkingObjects) {
         fatalError("LinkingObjects properties are read-only")
     }
@@ -252,20 +243,9 @@ extension Optional: SchemaDiscoverable, _RealmSchemaDiscoverable where Wrapped: 
     }
 }
 
-extension Optional: _Persistable where Wrapped: _OptionalPersistable {
-    public typealias PersistedType = Self
-
-    public static func _rlmDefaultValue(_ forceDefaultInitialization: Bool) -> Self {
-        if forceDefaultInitialization {
-            return Wrapped()
-        }
-        return .none
-    }
+extension Optional: _Persistable where Wrapped: _PersistableInOptional {
     public static func _rlmGetProperty(_ obj: ObjectBase, _ key: UInt16) -> Wrapped? {
         return Wrapped._rlmGetPropertyOptional(obj, key)
-    }
-    public static func _rlmGetPropertyOptional(_ obj: ObjectBase, _ key: UInt16) -> Wrapped?? {
-        fatalError("Double-optional properties are not supported")
     }
     public static func _rlmSetProperty(_ obj: ObjectBase, _ key: UInt16, _ value: Wrapped?) {
         if let value = value {
@@ -302,7 +282,7 @@ extension RawRepresentable where RawValue: _RealmSchemaDiscoverable {
     }
 }
 
-extension RawRepresentable where Self: _OptionalPersistable, RawValue: _OptionalPersistable {
+extension RawRepresentable where Self: _PersistableInOptional, RawValue: _PersistableInOptional {
     public typealias PersistedType = RawValue
     public static func _rlmGetProperty(_ obj: ObjectBase, _ key: PropertyKey) -> Self {
         return Self(rawValue: RawValue._rlmGetProperty(obj, key))!

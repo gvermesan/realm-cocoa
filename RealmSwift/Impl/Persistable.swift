@@ -28,12 +28,38 @@ public typealias PropertyKey = UInt16
 // A tag protocol used in schema discovery to find @Persisted properties
 internal protocol DiscoverablePersistedProperty: _RealmSchemaDiscoverable {}
 
-// A type which can be stored by the @Persisted property wrapper
+// A protocol marking types which can be used inside an `Optional<T>` in a
+// Realm collection or a `@Persisted` property.
+public protocol _PersistableInOptional: RealmCollectionValue where PersistedType: _PersistableInOptional {
+    // Read an optional value of this type from the target object
+    static func _rlmGetPropertyOptional(_ obj: ObjectBase, _ key: PropertyKey) -> Self?
+}
+
+/**
+ A type which can be stored by the @Persisted property wrapper.
+
+ As with all underscore-prefixed names, this protocol is not part of the public
+ API and may change without warning. To make custom types conform to this
+ protocol, conform to CustomPersistable or FailableCustomPersistable rather than
+ conforming to this directly.
+
+ Our protocol heirarchy for types which we can store has four levels, from most
+ restrictive to least restrictive:
+
+ 1. `_PersistableInOptional`: Anything which can appear inside an `Optional<T>`:
+    the primitive types (int, string, etc.), Object and EmbeddedObject subclasses,
+    and custom mapped types.
+ 2. `RealmCollectionValue`: Anything which can appear inside a Realm collection.
+    The above types, plus the Optional variants of them.
+ 3. `_Persistable`: The types which can appear on managed property. The above
+    types, plus any of those types in a List, MutableSet, or Map.
+ 4. `_ObjcBridgeable`: Everything which we can convert to/from Any. The above
+    types, plus a few assorted things like NSNumber that we never store but
+    can be used as the result of aggregate operations.
+*/
 public protocol _Persistable: _RealmSchemaDiscoverable, _ObjcBridgeable {
     // Read a value of this type from the target object
     static func _rlmGetProperty(_ obj: ObjectBase, _ key: PropertyKey) -> Self
-    // Read an optional value of this type from the target object
-    static func _rlmGetPropertyOptional(_ obj: ObjectBase, _ key: PropertyKey) -> Self?
     // Set a value of this type on the target object
     static func _rlmSetProperty(_ obj: ObjectBase, _ key: PropertyKey, _ value: Self)
     // Set the swiftAccessor for this type if the default PersistedPropertyAccessor
@@ -51,10 +77,11 @@ public protocol _Persistable: _RealmSchemaDiscoverable, _ObjcBridgeable {
     static func _rlmKeyPathRecorder(with lastAccessedNames: NSMutableArray) -> Self
     // The type which is actually stored in the Realm. This is Self for types
     // we support directly, but may be a different type for enums and mapped types.
-    associatedtype PersistedType: _Persistable
+    associatedtype PersistedType: _Persistable & _RealmSchemaDiscoverable
 }
 
 extension _Persistable {
+    // Only the collections need caching, so define a default for the rest of the types
     public static var _rlmRequiresCaching: Bool {
         false
     }
@@ -78,10 +105,7 @@ extension _RealmSchemaDiscoverable where Self: _Persistable {
     }
 }
 
-// A tag protocol for persistable types which can appear inside Optional
-public protocol _OptionalPersistable: _Persistable, _DefaultConstructible { }
-
-extension _OptionalPersistable {
+extension _PersistableInOptional {
     public static func _rlmSetAccessor(_ prop: RLMProperty) {
         if prop.optional {
             prop.swiftAccessor = PersistedPropertyAccessor<Optional<Self>>.self

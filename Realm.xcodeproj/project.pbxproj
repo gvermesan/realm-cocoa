@@ -208,6 +208,8 @@
 		3F9ADA9426E7E87B007349A5 /* SwiftCollectionSyncTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F9ADA9326E7E87B007349A5 /* SwiftCollectionSyncTests.swift */; };
 		3F9B4A6624CF8C0E00C72A4A /* realm-monorepo.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3FE5B4D424CF3F06004D4EF3 /* realm-monorepo.xcframework */; };
 		3F9D91822152D42F00474F09 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = E8839B2D19E31FD90047B1A8 /* main.m */; };
+		3F9F53D32718B5DA000EEB4A /* CustomPersistable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F9F53D22718B5DA000EEB4A /* CustomPersistable.swift */; };
+		3F9F53D52718E8E6000EEB4A /* CustomPersistableTestObjects.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F9F53D42718E8E6000EEB4A /* CustomPersistableTestObjects.swift */; };
 		3FA5E94D266064C4008F1345 /* ModernObjectCreationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FA5E94C266064C4008F1345 /* ModernObjectCreationTests.swift */; };
 		3FB19069265ECF0C00DA7C76 /* ModernObjectTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FB19068265ECF0C00DA7C76 /* ModernObjectTests.swift */; };
 		3FB1906B265ED23300DA7C76 /* ModernTestObjects.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FB1906A265ED23300DA7C76 /* ModernTestObjects.swift */; };
@@ -862,6 +864,8 @@
 		3F997772273E23D300AA9E13 /* RealmCollectionImpl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealmCollectionImpl.swift; sourceTree = "<group>"; };
 		3F9ADA9326E7E87B007349A5 /* SwiftCollectionSyncTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SwiftCollectionSyncTests.swift; path = Realm/ObjectServerTests/SwiftCollectionSyncTests.swift; sourceTree = "<group>"; };
 		3F9D91872152D42F00474F09 /* TestHost static.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "TestHost static.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		3F9F53D22718B5DA000EEB4A /* CustomPersistable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomPersistable.swift; sourceTree = "<group>"; };
+		3F9F53D42718E8E6000EEB4A /* CustomPersistableTestObjects.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomPersistableTestObjects.swift; sourceTree = "<group>"; };
 		3FA5E94C266064C4008F1345 /* ModernObjectCreationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ModernObjectCreationTests.swift; sourceTree = "<group>"; };
 		3FB19068265ECF0C00DA7C76 /* ModernObjectTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ModernObjectTests.swift; sourceTree = "<group>"; };
 		3FB1906A265ED23300DA7C76 /* ModernTestObjects.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ModernTestObjects.swift; sourceTree = "<group>"; };
@@ -1431,6 +1435,7 @@
 				CFB43139243DF87100471C18 /* App.swift */,
 				4996EA9D2465BB8A003A1F51 /* BSON.swift */,
 				3F102CBC23DBC68300108FD2 /* Combine.swift */,
+				3F9F53D22718B5DA000EEB4A /* CustomPersistable.swift */,
 				3FB6ABD82416A27000E318C2 /* Decimal128.swift */,
 				3FC3F9162419B63100E27322 /* EmbeddedObject.swift */,
 				29B7FDF51C0DA6560023224E /* Error.swift */,
@@ -1476,6 +1481,7 @@
 				3FCB1A7422A9B0A2003807FB /* CodableTests.swift */,
 				3FE2BE0223D8CAD1002860E9 /* CombineTests.swift */,
 				E8AE7C251EA436F800CDFF9A /* CompactionTests.swift */,
+				3F9F53D42718E8E6000EEB4A /* CustomPersistableTestObjects.swift */,
 				CFFECBA8250646750010F585 /* Decimal128Tests.swift */,
 				CF0D04F02693652E0038A058 /* KeyPathTests.swift */,
 				5D660FFF1BE98D880021E04F /* KVOTests.swift */,
@@ -2738,6 +2744,7 @@
 				3FE267D5264308680030F83C /* CollectionAccess.swift in Sources */,
 				3F102CBD23DBC68300108FD2 /* Combine.swift in Sources */,
 				3FE267D6264308680030F83C /* ComplexTypes.swift in Sources */,
+				3F9F53D32718B5DA000EEB4A /* CustomPersistable.swift in Sources */,
 				3FB6ABD92416A27000E318C2 /* Decimal128.swift in Sources */,
 				3FC3F9172419B63200E27322 /* EmbeddedObject.swift in Sources */,
 				29B7FDF61C0DA6560023224E /* Error.swift in Sources */,
@@ -2787,6 +2794,7 @@
 				3FCB1A7522A9B0A2003807FB /* CodableTests.swift in Sources */,
 				3FE2BE0323D8CAD1002860E9 /* CombineTests.swift in Sources */,
 				E8AE7C261EA436F800CDFF9A /* CompactionTests.swift in Sources */,
+				3F9F53D52718E8E6000EEB4A /* CustomPersistableTestObjects.swift in Sources */,
 				CFFECBAA250646820010F585 /* Decimal128Tests.swift in Sources */,
 				CF0D04F1269365300038A058 /* KeyPathTests.swift in Sources */,
 				3FF3FFAF1F0D6D6400B84599 /* KVOTests.swift in Sources */,

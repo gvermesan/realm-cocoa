@@ -126,7 +126,7 @@ internal func staticBridgeCast<T: _ObjcBridgeable>(fromObjectiveC x: Any) -> T {
     if let value = T._rlmFromObjc(x) {
         return value
     }
-    fatalError("Could not convert value '\(x)' to type '\(T.self)'")
+    throwRealmException("Could not convert value '\(x)' to type '\(T.self)'.")
 }
 @usableFromInline
 internal func failableStaticBridgeCast<T: _ObjcBridgeable>(fromObjectiveC x: Any) -> T? {

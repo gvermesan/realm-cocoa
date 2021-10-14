@@ -179,13 +179,13 @@ private func forceCast<A, U>(_ from: A, to type: U.Type) -> U {
     return from as! U
 }
 
-/// A type which can be stored in a Realm List, MutableSet, or Results.
+/// A type which can be stored in a Realm List, MutableSet, Map, or Results.
 ///
-/// Declaring additional types as conforming to this protocol will not make them
-/// actually work. Most of the logic for how to store values in Realm is not
-/// implemented in Swift and there is currently no extension mechanism for
-/// supporting more types.
-public protocol RealmCollectionValue: Hashable, _RealmSchemaDiscoverable, _ObjcBridgeable {
+/// Directly declaring additional types as conforming to this protocol will not
+/// make them actually work, as most of the logic related to storing types is
+/// not implemented in Swift. Instead, declare types as conforming to
+/// CustomPersistable or FailableCustomPersistable.
+public protocol RealmCollectionValue: Hashable, _Persistable, _PossiblyAggregateable where PersistedType: RealmCollectionValue {
     /// :nodoc:
     // If we are in key path tracing mode, instantiate an empty object and forward
     // the lastAccessedNames array.
@@ -210,11 +210,6 @@ extension RealmCollectionValue {
     }
 }
 
-extension Int: RealmCollectionValue {}
-extension Int8: RealmCollectionValue {}
-extension Int16: RealmCollectionValue {}
-extension Int32: RealmCollectionValue {}
-extension Int64: RealmCollectionValue {}
 extension Float: RealmCollectionValue {}
 extension Double: RealmCollectionValue {}
 extension Bool: RealmCollectionValue {}
@@ -226,12 +221,15 @@ extension ObjectId: RealmCollectionValue {}
 extension UUID: RealmCollectionValue {}
 extension AnyRealmValue: RealmCollectionValue {}
 
-extension Optional: RealmCollectionValue where Wrapped: RealmCollectionValue,
-                                               Wrapped: _DefaultConstructible {
+extension Optional: _PossiblyAggregateable where Wrapped: _PossiblyAggregateable {
+    public typealias PersistedType = Wrapped.PersistedType?
+}
+
+extension Optional: RealmCollectionValue where Wrapped: RealmCollectionValue & _PersistableInOptional {
     /// :nodoc:
-    public static func _rlmDefaultValue(_ forceDefaultInitialization: Bool) -> Optional<Wrapped> {
+    public static func _rlmDefaultValue(_ forceDefaultInitialization: Bool) -> Self {
         if forceDefaultInitialization {
-            return Wrapped()
+            return Wrapped._rlmDefaultValue(forceDefaultInitialization)
         }
         return .none
     }
@@ -361,7 +359,7 @@ public protocol RealmCollection: RealmCollectionBase, Equatable {
 
      - parameter property: The name of a property whose minimum value is desired.
      */
-    func min<T: MinMaxType>(ofProperty property: String) -> T?
+    func min<T: _PossiblyAggregateable>(ofProperty property: String) -> T? where T.PersistedType: MinMaxType
 
     /**
      Returns the maximum (highest) value of the given property among all the objects in the collection, or `nil` if the
@@ -371,7 +369,7 @@ public protocol RealmCollection: RealmCollectionBase, Equatable {
 
      - parameter property: The name of a property whose minimum value is desired.
      */
-    func max<T: MinMaxType>(ofProperty property: String) -> T?
+    func max<T: _PossiblyAggregateable>(ofProperty property: String) -> T? where T.PersistedType: MinMaxType
 
     /**
     Returns the sum of the given property for objects in the collection, or `nil` if the collection is empty.
@@ -380,7 +378,7 @@ public protocol RealmCollection: RealmCollectionBase, Equatable {
 
     - parameter property: The name of a property conforming to `AddableType` to calculate sum on.
     */
-    func sum<T: AddableType>(ofProperty property: String) -> T
+    func sum<T: _PossiblyAggregateable>(ofProperty property: String) -> T where T.PersistedType: AddableType
 
     /**
      Returns the average value of a given property over all the objects in the collection, or `nil` if
@@ -390,8 +388,7 @@ public protocol RealmCollection: RealmCollectionBase, Equatable {
 
      - parameter property: The name of a property whose values should be summed.
      */
-    func average<T: AddableType>(ofProperty property: String) -> T?
-
+    func average<T: _PossiblyAggregateable>(ofProperty property: String) -> T? where T.PersistedType: AddableType
 
     // MARK: Key-Value Coding
 
@@ -667,7 +664,7 @@ public extension RealmCollection where Element: ObjectBase {
 
      - parameter keyPath: The keyPath of a property whose minimum value is desired.
      */
-    func min<T: MinMaxType>(of keyPath: KeyPath<Element, T>) -> T? {
+    func min<T: _PossiblyAggregateable>(of keyPath: KeyPath<Element, T>) -> T? where T.PersistedType: MinMaxType {
         min(ofProperty: _name(for: keyPath))
     }
 
@@ -679,7 +676,7 @@ public extension RealmCollection where Element: ObjectBase {
 
      - parameter keyPath: The keyPath of a property whose minimum value is desired.
      */
-    func max<T: MinMaxType>(of keyPath: KeyPath<Element, T>) -> T? {
+    func max<T: _PossiblyAggregateable>(of keyPath: KeyPath<Element, T>) -> T? where T.PersistedType: MinMaxType {
         max(ofProperty: _name(for: keyPath))
     }
 
@@ -690,7 +687,7 @@ public extension RealmCollection where Element: ObjectBase {
 
     - parameter keyPath: The keyPath of a property conforming to `AddableType` to calculate sum on.
     */
-    func sum<T: AddableType>(of keyPath: KeyPath<Element, T>) -> T {
+    func sum<T: _PossiblyAggregateable>(of keyPath: KeyPath<Element, T>) -> T where T.PersistedType: AddableType {
         sum(ofProperty: _name(for: keyPath))
     }
 
@@ -702,12 +699,12 @@ public extension RealmCollection where Element: ObjectBase {
 
      - parameter keyPath: The keyPath of a property whose values should be summed.
      */
-    func average<T: AddableType>(of keyPath: KeyPath<Element, T>) -> T? {
+    func average<T: _PossiblyAggregateable>(of keyPath: KeyPath<Element, T>) -> T? where T.PersistedType: AddableType {
         average(ofProperty: _name(for: keyPath))
     }
 }
 
-public extension RealmCollection where Element: MinMaxType {
+public extension RealmCollection where Element.PersistedType: MinMaxType {
     /**
      Returns the minimum (lowest) value of the collection, or `nil` if the collection is empty.
      */
@@ -722,22 +719,7 @@ public extension RealmCollection where Element: MinMaxType {
     }
 }
 
-public extension RealmCollection where Element: OptionalProtocol, Element.Wrapped: MinMaxType {
-    /**
-     Returns the minimum (lowest) value of the collection, or `nil` if the collection is empty.
-     */
-    func min() -> Element.Wrapped? {
-        return min(ofProperty: "self")
-    }
-    /**
-     Returns the maximum (highest) value of the collection, or `nil` if the collection is empty.
-     */
-    func max() -> Element.Wrapped? {
-        return max(ofProperty: "self")
-    }
-}
-
-public extension RealmCollection where Element: AddableType {
+public extension RealmCollection where Element.PersistedType: AddableType {
     /**
      Returns the sum of the values in the collection, or `nil` if the collection is empty.
      */
@@ -747,26 +729,10 @@ public extension RealmCollection where Element: AddableType {
     /**
      Returns the average of all of the values in the collection.
      */
-    func average<T: AddableType>() -> T? {
+    func average<T: _PossiblyAggregateable>() -> T? where T.PersistedType: AddableType {
         return average(ofProperty: "self")
     }
 }
-
-public extension RealmCollection where Element: OptionalProtocol, Element.Wrapped: AddableType {
-    /**
-     Returns the sum of the values in the collection, or `nil` if the collection is empty.
-     */
-    func sum() -> Element.Wrapped {
-        return sum(ofProperty: "self")
-    }
-    /**
-     Returns the average of all of the values in the collection.
-     */
-    func average<T: AddableType>() -> T? {
-        return average(ofProperty: "self")
-    }
-}
-
 
 // MARK: Sort and distinct
 
@@ -805,24 +771,7 @@ public extension RealmCollection where Element: ObjectBase {
      - parameter keyPath:   The key path to sort by.
      - parameter ascending: The direction to sort in.
      */
-    func sorted<T: Comparable>(by keyPath: KeyPath<Element, T>, ascending: Bool = true) -> Results<Element> {
-        sorted(by: [SortDescriptor(keyPath: keyPath, ascending: ascending)])
-    }
-
-    /**
-     Returns a `Results` containing the objects in the collection, but sorted.
-
-     Objects are sorted based on the values of the given key path. For example, to sort a collection of `Student`s from
-     youngest to oldest based on their `age` property, you might call
-     `students.sorted(byKeyPath: "age", ascending: true)`.
-
-     - warning: Collections may only be sorted by properties of boolean, `Date`, `NSDate`, single and double-precision
-                floating point, integer, and string types.
-
-     - parameter keyPath:   The key path to sort by.
-     - parameter ascending: The direction to sort in.
-     */
-    func sorted<T: Comparable>(by keyPath: KeyPath<Element, Optional<T>>, ascending: Bool = true) -> Results<Element> {
+    func sorted<T: _PossiblyAggregateable>(by keyPath: KeyPath<Element, T>, ascending: Bool = true) -> Results<Element> where T.PersistedType: SortableType {
         sorted(by: [SortDescriptor(keyPath: keyPath, ascending: ascending)])
     }
 
@@ -838,28 +787,7 @@ public extension RealmCollection where Element: ObjectBase {
 
 }
 
-public extension RealmCollection where Element: Comparable {
-    /**
-     Returns a `Results` containing the objects in the collection, but sorted.
-
-     Objects are sorted based on their values. For example, to sort a collection of `Date`s from
-     neweset to oldest based, you might call `dates.sorted(ascending: true)`.
-
-     - parameter ascending: The direction to sort in.
-     */
-    func sorted(ascending: Bool = true) -> Results<Element> {
-        sorted(by: [SortDescriptor(keyPath: "self", ascending: ascending)])
-    }
-
-    /**
-     Returns a `Results` containing the distinct values in the collection.
-     */
-    func distinct() -> Results<Element> {
-        return distinct(by: ["self"])
-    }
-}
-
-public extension RealmCollection where Element: OptionalProtocol, Element.Wrapped: Comparable {
+public extension RealmCollection where Element.PersistedType: SortableType {
     /**
      Returns a `Results` containing the objects in the collection, but sorted.
 
@@ -1188,7 +1116,7 @@ extension AnyRealmCollection: Encodable where Element: Encodable {}
 
 // MARK: Key Path Strings
 
-/// Tag protocol which allows a collection to produce its property name
+/// Protocol which allows a collection to produce its property name
 internal protocol PropertyNameConvertible {
     /// A mutable array referenced from the enclosing parent that contains the last accessed property names.
     var lastAccessedNames: NSMutableArray? { get set }

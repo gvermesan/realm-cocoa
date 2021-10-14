@@ -15,13 +15,25 @@ Xcode 12.4 is now the minimum supported version of Xcode.
 * Queries on collections of PersistableEnums can now be performed with `where()`.
 * Add support for querying on the rawValue of an enum with `where()`.
 * `.count` is supported for Maps of all types rather than just numeric types in `where()`.
+* Some invalid property declarations such as storing an optional
+  `AnyRealmValue` (e.g. `List<AnyRealmValue?>`) or double-optional value (e.g.
+  `Int??`) are now compile-time errors rather than runtime errors.
+* Allow using a keypath following `@allValues` in queries on Map.
+* Add support for querying on the properties of objects contained in
+  dictionaries (e.g. "dictProperty.@allValues.name CONTAINS 'a'").
+* Improve the error message for many types of invalid predicates in queries.
+* Add support for comparing `@allKeys` to another property on the same object.
 
 ### Fixed
-* Add missing `Indexable` support for UUID. 
+* Add missing `Indexable` support for UUID.
   ([Cocoa #7545](https://github.com/realm/realm-cocoa/issues/7545), since v10.10.0)
 * `where()` allowed constructing some nonsensical queries due to boolean comparisons returning `Query<T>` rather than `Query<Bool>`.
 * `Object.init(value:)` did not allow initializing `RLMDictionary<NSString, RLMObject>`/`Map<String, Object?>`
   properties with null values for map entries (since v10.8.0).
+* `@allValues` queries on dictionaries accidentally did not require "ANY".
+* Case-insensitive and diacritic-insensitive modifiers were ignored when
+  comparing the result of an aggregate operation to another property in a
+  query.
 
 <!-- ### Breaking Changes - ONLY INCLUDE FOR NEW MAJOR version -->
 
