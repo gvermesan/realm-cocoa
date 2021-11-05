@@ -4,7 +4,11 @@ x.y.z Release notes (yyyy-MM-dd)
 Xcode 12.4 is now the minimum supported version of Xcode.
 
 ### Enhancements
-* None.
+* Greatly improve performance of reading AnyRealmValue and enum types from
+  Realm collections.
+* Allow using Swift enums which conform to `PersistableEnum` as the value type
+  for all Realm collections.
+* `AnyRealmCollection` now conforms to `Encodable`.
 
 ### Fixed
 * Add missing `Indexable` support for UUID. 
@@ -28,8 +32,6 @@ Xcode 12.4 is now the minimum supported version of Xcode.
 ### Enhancements
 
 * Conform `@ThreadSafe` and `ThreadSafeReference` to `Sendable`.
-* Allow using Swift enums which conform to `PersistableEnum` as the value type
-  for all Realm collections.
 
 ### Fixed
 

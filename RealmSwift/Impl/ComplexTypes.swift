@@ -312,13 +312,7 @@ extension RawRepresentable where Self: _OptionalPersistable, RawValue: _Optional
         if prop.optional {
             prop.swiftAccessor = BridgedPersistedPropertyAccessor<Optional<Self>>.self
         } else {
-            prop.swiftAccessor = PersistedEnumAccessor<Self>.self
+            prop.swiftAccessor = BridgedPersistedPropertyAccessor<Self>.self
         }
-    }
-}
-
-extension PersistableEnum {
-    public static func _rlmDefaultValue(_ forceDefaultInitialization: Bool) -> Self {
-        return self.allCases.first!
     }
 }
