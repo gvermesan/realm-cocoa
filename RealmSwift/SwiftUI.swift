@@ -421,7 +421,7 @@ private class ObservableStorage<ObservedType>: ObservableObject where ObservedTy
                 filter: NSPredicate? = nil,
                 keyPaths: [String]? = nil,
                 sortDescriptor: SortDescriptor? = nil) {
-        self.storage = Storage(Results(RLMResults.emptyDetached()), keyPaths)
+        self.storage = Storage(Results(RLMResults<ResultType>.emptyDetached()), keyPaths)
         self.storage.configuration = configuration
         self.filter = filter
         self.sortDescriptor = sortDescriptor

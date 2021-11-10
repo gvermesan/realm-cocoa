@@ -156,44 +156,27 @@ extension AnyRealmValue: _ObjcBridgeable {
 
 // MARK: - Collections
 
-extension LinkingObjects: _ObjcBridgeable {
-    public static func _rlmFromObjc(_ value: Any) -> Self? {
-        (value as? RLMResults).map(LinkingObjects.init(objc:))
-    }
-    public var _rlmObjcValue: Any {
-        handle!.results
-    }
-}
-
-extension Results: _ObjcBridgeable {
-    public static func _rlmFromObjc(_ value: Any) -> Self? {
-        (value as? RLMResults).map(Results.init(objc:))
-    }
-    public var _rlmObjcValue: Any {
-        self.rlmResults
-    }
-}
-
-extension RLMSwiftCollectionBase: Equatable, _ObjcBridgeable {
+extension Map: _ObjcBridgeable {
+    public var _rlmObjcValue: Any { _rlmCollection }
     public static func _rlmFromObjc(_ value: Any) -> Self? {
         (value as? RLMCollection).map(Self.init(collection:))
     }
-
-    public var _rlmObjcValue: Any {
-        _rlmCollection
-    }
-
-    public static func == (lhs: RLMSwiftCollectionBase, rhs: RLMSwiftCollectionBase) -> Bool {
-        return lhs.isEqual(rhs)
+}
+extension RealmCollectionImpl {
+    public var _rlmObjcValue: Any { self.collection }
+    public static func _rlmFromObjc(_ value: Any) -> Self? {
+        (value as? RLMCollection).map(Self.init(collection:))
     }
 }
 
-extension AnyRealmCollection: _ObjcBridgeable {
-    public static func _rlmFromObjc(_ value: Any) -> Self? {
-        (value as? RLMCollection).map(Self.init(objc:))
-    }
-    public var _rlmObjcValue: Any {
-        self.base
-    }
+extension LinkingObjects: _ObjcBridgeable {}
+extension Results: _ObjcBridgeable {}
+extension AnyRealmCollection: _ObjcBridgeable {}
+extension List: _ObjcBridgeable {}
+extension MutableSet: _ObjcBridgeable {}
 
+extension RLMSwiftCollectionBase: Equatable {
+    public static func == (lhs: RLMSwiftCollectionBase, rhs: RLMSwiftCollectionBase) -> Bool {
+        return lhs.isEqual(rhs)
+    }
 }
