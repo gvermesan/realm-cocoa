@@ -504,7 +504,6 @@ class ObjectSchemaInitializationTests: TestCase {
         assertType(MutableSet<ObjectId>.self, .objectId, set: true)
         assertType(MutableSet<AnyRealmValue>.self, .any, set: true)
         assertType(MutableSet<Object>.self, .object, set: true, objectType: "RealmSwiftObject")
-        assertType(MutableSet<EmbeddedObject>.self, .object, set: true, objectType: "RealmSwiftEmbeddedObject")
 
         assertType(MutableSet<Int?>.self, .int, optional: true, set: true)
         assertType(MutableSet<Int8?>.self, .int, optional: true, set: true)
@@ -567,8 +566,8 @@ class ObjectSchemaInitializationTests: TestCase {
                      reason: "Object property 'name' must be marked as optional.")
         assertThrows(RLMProperty(name: "_name", value: Persisted<List<EmbeddedObject?>>()),
                      reason: "List<RealmSwiftObject> property 'name' must not be marked as optional.")
-        assertThrows(RLMProperty(name: "_name", value: Persisted<MutableSet<EmbeddedObject?>>()),
-                     reason: "MutableSet<RealmSwiftObject> property 'name' must not be marked as optional.")
+        assertThrows(RLMProperty(name: "_name", value: Persisted<MutableSet<EmbeddedObject>>()),
+                     reason: "MutableSet<RealmSwiftEmbeddedObject> property 'name' cannot contain embedded objects. Set identity semantics are not applicable to embedded objects, and List<RealmSwiftEmbeddedObject> should be used instead.")
         assertThrows(RLMProperty(name: "_name", value: Persisted<LinkingObjects<EmbeddedObject>>()),
                      reason: "LinkingObjects<RealmSwiftEmbeddedObject> property 'name' must set the origin property name with @Persisted(originProperty: \"name\").")
         assertThrows(RLMProperty(name: "_name", value: Persisted<Map<String, Object>>()),

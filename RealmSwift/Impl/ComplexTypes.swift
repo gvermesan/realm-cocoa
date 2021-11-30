@@ -60,6 +60,9 @@ extension EmbeddedObject: SchemaDiscoverable, _OptionalPersistable, _DefaultCons
     public typealias PersistedType = EmbeddedObject
     public static var _rlmType: PropertyType { .object }
     public static func _rlmPopulateProperty(_ prop: RLMProperty) {
+        if prop.set {
+            throwRealmException("MutableSet<\(className())> property '\(prop.name)' cannot contain embedded objects. Set identity semantics are not applicable to embedded objects, and List<\(className())> should be used instead.")
+        }
         Object._rlmPopulateProperty(prop)
         prop.objectClassName = className()
     }
