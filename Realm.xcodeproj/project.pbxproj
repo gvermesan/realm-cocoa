@@ -1077,7 +1077,7 @@
 		E81A1F661955FC9300FDED82 /* RLMArray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RLMArray.h; sourceTree = "<group>"; };
 		E81A1F671955FC9300FDED82 /* RLMArray.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = RLMArray.mm; sourceTree = "<group>"; };
 		E81A1F691955FC9300FDED82 /* RLMManagedArray.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; lineEnding = 0; path = RLMManagedArray.mm; sourceTree = "<group>"; };
-		E81A1F6A1955FC9300FDED82 /* RLMResults.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; lineEnding = 0; path = RLMResults.mm; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
+		E81A1F6A1955FC9300FDED82 /* RLMResults.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; lineEnding = 0; path = RLMResults.mm; sourceTree = "<group>"; };
 		E81A1F6B1955FC9300FDED82 /* RLMConstants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RLMConstants.h; sourceTree = "<group>"; };
 		E81A1F6C1955FC9300FDED82 /* RLMConstants.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RLMConstants.m; sourceTree = "<group>"; };
 		E81A1F6D1955FC9300FDED82 /* RLMObject_Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RLMObject_Private.h; sourceTree = "<group>"; };

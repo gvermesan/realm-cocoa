@@ -118,7 +118,7 @@ struct CallbackLogger : public realm::util::RootLogger {
 
 + (SyncClientConfig)configurationWithRootDirectory:(NSURL *)rootDirectory appId:(NSString *)appId {
     SyncClientConfig config;
-    bool should_encrypt = !getenv("REALM_DISABLE_METADATA_ENCRYPTION") && !RLMIsRunningInPlayground();
+    bool should_encrypt = false;
     config.logger_factory = defaultSyncLogger;
     config.metadata_mode = should_encrypt ? SyncManager::MetadataMode::Encryption
                                           : SyncManager::MetadataMode::NoEncryption;
